@@ -70,7 +70,7 @@ Class MokaConfig {
         foreach ($banks as $k => $v) {
             $return .= '<tr>'
                     . '<th><img src="' . HTTP_CATALOG . 'catalog/view/theme/default/image/moka_payment/' . $k . '.svg" width="105px"></th>'
-                    . '<th><select  name="moka_payment_rates[' . $k . '][active]" >'
+                    . '<th><select  name="payment_moka_payment_rates[' . $k . '][active]" >'
                     . '<option value="1">Aktif</option>'
                     . '<option value="0" ' . ((int) $rates[$k]['active'] == 0 ? 'selected="selected"' : '') . '>Pasif</option>'
                     . '</select></th>';
@@ -80,12 +80,12 @@ Class MokaConfig {
                 if (!isset($rates[$k]['installments'][$i]['value']))
                     $rates[$k]['installments'][$i]['value'] = 0;
                 $return .= '<td>'
-                        . ' Aktif <input type="checkbox"  name="moka_payment_rates[' . $k . '][installments][' . $i . '][active]" '
+                        . ' Aktif <input type="checkbox"  name="payment_moka_payment_rates[' . $k . '][installments][' . $i . '][active]" '
                         . ' value="1" ' . ((int) $rates[$k]['installments'][$i]['active'] == 1 ? 'checked="checked"' : '') . '/>'
                         . ' % <input type="number" step="0.01" maxlength="4" size="4" style="width:60px" '
                         . ((int) $rates[$k]['installments'][$i]['active'] == 0 ? 'disabled="disabled"' : '')
                         . ' value="' . ((float) $rates[$k]['installments'][$i]['value']) . '"'
-                        . ' name="moka_payment_rates[' . $k . '][installments][' . $i . '][value]"/></td>';
+                        . ' name="payment_moka_payment_rates[' . $k . '][installments][' . $i . '][value]"/></td>';
             }
             $return .= '</tr>';
         }
