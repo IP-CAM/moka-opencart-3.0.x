@@ -11,6 +11,7 @@ Class MokaConfig {
             'bonus' => array('name' => 'BonusCard', 'bank' => 'Garanti Bankası A.Ş.', 'installments' => true),
             'cardfinans' => array('name' => 'CardFinans', 'bank' => 'FinansBank A.Ş.', 'installments' => true),
             'maximum' => array('name' => 'Maximum', 'bank' => 'T.C. İş Bankası', 'installments' => true),
+	    'paraf' => array('name' => 'Paraf', 'bank' => 'Halk Bankası', 'installments' => true),
         );
     }
 
