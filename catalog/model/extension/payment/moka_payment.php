@@ -24,7 +24,7 @@ class ModelExtensionPaymentMokaPayment extends Model {
                 'code' => 'moka_payment',
                 'title' => $this->language->get('text_title'),
                 'terms' => '',
-                'sort_order' => $this->config->get('moka_payment_sort_order')
+                'sort_order' => $this->config->get('payment_moka_payment_sort_order')
             );
         }
 
