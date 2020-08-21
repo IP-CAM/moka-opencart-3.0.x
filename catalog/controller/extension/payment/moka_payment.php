@@ -108,7 +108,7 @@ private function setcookieSameSite($name, $value, $expire, $path, $domain, $secu
 	
     function PostMokaForm() {
 	    
-	//$setCookie = $this->setcookieSameSite("PHPSESSID", $_COOKIE['PHPSESSID'], time() + 86400, "/", $_SERVER['SERVER_NAME'], true, true);  
+	$setCookie = $this->setcookieSameSite("PHPSESSID", $_COOKIE['PHPSESSID'], time() + 86400, "/", $_SERVER['SERVER_NAME'], 0, 0);  
         $this->load->model('checkout/order');
         include(DIR_SYSTEM . 'library/mokapayment/mokaconfig.php');
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
