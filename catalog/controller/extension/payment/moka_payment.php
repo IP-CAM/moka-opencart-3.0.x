@@ -87,7 +87,7 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
       return $this->load->view($template_url, $data);
     }
 
-private function setcookieSameSite($name, $value, $expire, $path, $domain, $secure, $httponly)
+    private function setcookieSameSite($name, $value, $expire, $path, $domain, $secure, $httponly)
     {
 
         if (PHP_VERSION_ID < 70300) {
@@ -105,11 +105,25 @@ private function setcookieSameSite($name, $value, $expire, $path, $domain, $secu
 
         }
     }
-	
     function PostMokaForm() {
 	    
-	$setCookie = $this->setcookieSameSite("PHPSESSID", $_COOKIE['PHPSESSID'], time() + 86400, "/", $_SERVER['SERVER_NAME'], true, true);  
-        $this->load->model('checkout/order');
+        $cookieControl = false;
+
+        if (isset($_COOKIE['PHPSESSID'])) {
+            $sessionKey = "PHPSESSID";
+            $sessionValue = $_COOKIE['PHPSESSID'];
+            $cookieControl = true;
+        }
+        if (isset($_COOKIE['OCSESSID'])) {
+            $sessionKey = "OCSESSID";
+            $sessionValue = $_COOKIE['OCSESSID'];
+            $cookieControl = true;
+        }
+
+        if ($cookieControl) {
+            $setCookie = $this->setcookieSameSite($sessionKey, $sessionValue, time() + 86400, "/", $_SERVER['SERVER_NAME'], true, true);
+        }
+	$this->load->model('checkout/order');
         include(DIR_SYSTEM . 'library/mokapayment/mokaconfig.php');
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
 
