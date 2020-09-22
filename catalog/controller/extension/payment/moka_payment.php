@@ -1,15 +1,13 @@
 <?php
 error_reporting(0);
 
-
-
-class ControllerExtensionPaymentMokaPayment extends Controller {
+class ControllerExtensionPaymentMokaPayment extends Controller
+{
 
     private $order_prefix = "opencart30X_";
 
-    public function index() {
-
-
+    public function index()
+    {
 
         $this->language->load('extension/payment/moka_payment');
         $this->load->model('extension/payment/moka_payment');
@@ -28,13 +26,13 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
 
         $data['validform'] = $validform;
 
-
-
         $order_id = $this->session->data['order_id'];
         $unique_conversation_id = uniqid($this->order_prefix) . "_" . $order_id;
-        if (!isset($this->session->data['order_id']) OR ! $this->session->data['order_id'])
+        if (!isset($this->session->data['order_id']) or !$this->session->data['order_id']) {
             die('Sipariş ID bulunamadı');
-        if (!isset($this->session->data['order_id']) OR ! $this->session->data['order_id']) {
+        }
+
+        if (!isset($this->session->data['order_id']) or !$this->session->data['order_id']) {
             die('Sipariş ID bulunamadı');
         }
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
@@ -48,19 +46,18 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
             $record = $this->PostMokaForm();
         }
 
-        if (isset($_POST['isSuccessful']) AND $_POST['isSuccessful']) {
+        if (isset($_POST['isSuccessful']) and $_POST['isSuccessful']) {
             $record['result_code'] = $_POST['resultCode'];
             $record['result_message'] = $_POST['resultMessage'];
             $record['result'] = $_POST['isSuccessful'] == 'True' ? true : false;
         }
 
-
-        if (isset($record['result']) AND $record['result']) {
+        if (isset($record['result']) and $record['result']) {
             $record['id_order'] = $order_id;
             $comment = $this->record2Table($this->getRecordById($order_id));
-			 $message .= 'Payment ID: ' . $order_id . "\n";
+            $message .= 'Payment ID: ' . $order_id . "\n";
             $this->session->data['payment_method']['code'] = 'moka_payment';
-			$this->model_checkout_order->addOrderHistory($order_id, $this->config->get('payment_moka_payment_order_status_id'), $message, false);
+            $this->model_checkout_order->addOrderHistory($order_id, $this->config->get('payment_moka_payment_order_status_id'), $message, false);
             $this->response->redirect($this->url->link('checkout/success', '', 'SSL'));
         }
         if (isset($this->request->post['resultMessage'])) {
@@ -68,9 +65,9 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
 
             $this->response->redirect($this->url->link('checkout/checkout', '', 'SSL'));
         }
-        require_once(DIR_SYSTEM . 'library/mokapayment/mokaconfig.php');
+        require_once DIR_SYSTEM . 'library/mokapayment/mokaconfig.php';
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
-      $total_cart = round($order_info['total'] * $order_info['currency_value'], 2);
+        $total_cart = round($order_info['total'] * $order_info['currency_value'], 2);
         $moka_rates = MokaConfig::calculatePrices($total_cart, $this->config->get('payment_moka_payment_rates'));
 
         $data['installments_mode'] = $this->config->get('payment_moka_payment_installement');
@@ -79,12 +76,12 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
 
         $data['action'] = $this->url->link('extension/payment/moka_payment', '', 'SSL');
 
-            if (VERSION >= '2.2.0.0'){
-                    $template_url = 'extension/payment/moka_payment';
-                } else {
-                    $template_url = 'default/template/extension/payment/moka_payment';
-                }
-      return $this->load->view($template_url, $data);
+        if (VERSION >= '2.2.0.0') {
+            $template_url = 'extension/payment/moka_payment';
+        } else {
+            $template_url = 'default/template/extension/payment/moka_payment';
+        }
+        return $this->load->view($template_url, $data);
     }
 
     private function setcookieSameSite($name, $value, $expire, $path, $domain, $secure, $httponly)
@@ -105,8 +102,9 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
 
         }
     }
-    function PostMokaForm() {
-	    
+    public function PostMokaForm()
+    {
+
         $cookieControl = false;
 
         if (isset($_COOKIE['PHPSESSID'])) {
@@ -123,21 +121,19 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
         if ($cookieControl) {
             $setCookie = $this->setcookieSameSite($sessionKey, $sessionValue, time() + 86400, "/", $_SERVER['SERVER_NAME'], true, true);
         }
-	$this->load->model('checkout/order');
-        include(DIR_SYSTEM . 'library/mokapayment/mokaconfig.php');
+        $this->load->model('checkout/order');
+        include DIR_SYSTEM . 'library/mokapayment/mokaconfig.php';
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
-
 
         $record = array(
             'result_code' => '0',
             'result_message' => '',
-            'result' => false
+            'result' => false,
         );
 
         $total = $this->request->post['mokatotal'];
 
-        require_once(DIR_SYSTEM . 'library/mokapayment/mokaconfig.php');
-
+        require_once DIR_SYSTEM . 'library/mokapayment/mokaconfig.php';
 
         $name = $this->request->post['card-name'];
         $number = $this->request->post['number'];
@@ -174,14 +170,11 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
             $installement = 1;
         }
 
-
         $orderid = $this->session->data['order_id'];
         $moka_username = $this->config->get('payment_moka_payment_username');
         $moka_password = $this->config->get('payment_moka_payment_password');
         $moka_dealercode = $this->config->get('payment_moka_payment_dealercode');
         $moka_3d_mode = $this->config->get('payment_moka_payment_moka_3d_mode');
-
-
 
         $moka = array();
 
@@ -189,14 +182,18 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
             'DealerCode' => $moka_dealercode,
             'Username' => $moka_username,
             'Password' => $moka_password,
-            'CheckKey' => hash('sha256', $moka_dealercode . 'MK' . $moka_username . 'PD' . $moka_password)
+            'CheckKey' => hash('sha256', $moka_dealercode . 'MK' . $moka_username . 'PD' . $moka_password),
         );
-
+        if (strlen($expiryYY) == 4) {
+            $exprYYYY = $expiryYY;
+        } else {
+            $exprYYYY = '20' . $expiryYY;
+        }
         $moka['PaymentDealerRequest'] = array(
             'CardHolderFullName' => $name,
             'CardNumber' => $number,
             'ExpMonth' => $expiryMM,
-            'ExpYear' => '20' . $expiryYY,
+            'ExpYear' => $exprYYYY,
             'CvcNumber' => $cvc,
             'Amount' => $paid,
             'Currency' => $order_info['currency_code'] == 'TRY' ? 'TL' : $order_info['currency_code'],
@@ -204,23 +201,28 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
             'OtherTrxCode' => (string) $orderid,
             'ClientIP' => $order_info['ip'],
             'Software' => 'Opencart-30',
-            'RedirectUrl' => $this->url->link('extension/payment/moka_payment', '', 'SSL')
+            'RedirectUrl' => $this->url->link('extension/payment/moka_payment', '', 'SSL'),
         );
 
-      $payment_moka_payment_test_mode = $this->config->get('payment_moka_payment_test_mode');
-	  if ($payment_moka_payment_test_mode == 'OFF') {
-	if (!defined('_MOKA_API_URL_'))
-	  define('_MOKA_API_URL_', 'https://service.moka.com/PaymentDealer/DoDirectPayment');
-  		if (!defined('_MOKA_3D_URL_'))
-    define('_MOKA_3D_URL_', 'https://service.moka.com/PaymentDealer/DoDirectPaymentThreeD');
-  }else{
-	  define('_MOKA_API_URL_', 'https://service.testmoka.com/PaymentDealer/DoDirectPayment');
-  		if (!defined('_MOKA_3D_URL_'))
-    define('_MOKA_3D_URL_', 'https://service.testmoka.com/PaymentDealer/DoDirectPaymentThreeD');
+        $payment_moka_payment_test_mode = $this->config->get('payment_moka_payment_test_mode');
+        if ($payment_moka_payment_test_mode == 'OFF') {
+            if (!defined('_MOKA_API_URL_')) {
+                define('_MOKA_API_URL_', 'https://service.moka.com/PaymentDealer/DoDirectPayment');
+            }
 
-  }
+            if (!defined('_MOKA_3D_URL_')) {
+                define('_MOKA_3D_URL_', 'https://service.moka.com/PaymentDealer/DoDirectPaymentThreeD');
+            }
+
+        } else {
+            define('_MOKA_API_URL_', 'https://service.testmoka.com/PaymentDealer/DoDirectPayment');
+            if (!defined('_MOKA_3D_URL_')) {
+                define('_MOKA_3D_URL_', 'https://service.testmoka.com/PaymentDealer/DoDirectPaymentThreeD');
+            }
+
+        }
         if ($moka_3d_mode == 'OFF') {
-         $gateway_url = _MOKA_API_URL_;
+            $gateway_url = _MOKA_API_URL_;
         } else {
 
             $gateway_url = _MOKA_3D_URL_;
@@ -228,23 +230,23 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
 
         $result = json_decode($this->curlPostExt(json_encode($moka), $gateway_url, true));
 
-        if (!$result OR $result == NULL) {
+        if (!$result or $result == null) {
             $record['result_code'] = 'CURL-LOAD_ERROR';
             $record['result_message'] = 'WebServis Error ';
             return $record;
         }
 
-        if (isset($result->ResultCode) AND $result->ResultCode == "Success") {
-            if ($moka_3d_mode != 'OFF')
+        if (isset($result->ResultCode) and $result->ResultCode == "Success") {
+            if ($moka_3d_mode != 'OFF') {
                 header("Location:" . $result->Data);
-            if (isset($result->Data->IsSuccessful) AND $result->Data->IsSuccessful) {
+            }
+
+            if (isset($result->Data->IsSuccessful) and $result->Data->IsSuccessful) {
                 $record['result_code'] = '99';
                 $record['result_message'] = $result->ResultCode;
                 $record['result'] = true;
                 return $record;
             }
-
-
 
             $record['result_code'] = isset($result->Data->ResultCode) ? $result->Data->ResultCode : 'UKN-01';
             $record['result_message'] = $errr;
@@ -293,7 +295,7 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
                     break;
 
                 default:
-                    $errr = "Beklenmeyen Bir hata Oluştu". $ResultCode;
+                    $errr = "Beklenmeyen Bir hata Oluştu" . $ResultCode;
             }
 
             $this->session->data['error'] = $errr;
@@ -305,12 +307,15 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
         return $record;
     }
 
-    private function curlPostExt($data, $url, $json = false) {
+    private function curlPostExt($data, $url, $json = false)
+    {
         $ch = curl_init(); // initialize curl handle
         curl_setopt($ch, CURLOPT_URL, $url); // set url to post to
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // return into a variable
-        if ($json)
+        if ($json) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-type: application/json"));
+        }
+
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30); // times out after 4s
@@ -323,7 +328,8 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
         }
     }
 
-    public function getSiteUrl() {
+    public function getSiteUrl()
+    {
         if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) {
             $site_url = is_null($this->config->get('config_ssl')) ? HTTPS_SERVER : $this->config->get('config_ssl');
         } else {
@@ -332,7 +338,8 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
         return $site_url;
     }
 
-    public function getServerConnectionSlug() {
+    public function getServerConnectionSlug()
+    {
         if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) {
             $connection = 'SSL';
         } else {
@@ -342,7 +349,8 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
         return $connection;
     }
 
-    private function _getCurrencySymbol($currencyCode) {
+    private function _getCurrencySymbol($currencyCode)
+    {
         $currencySymbol = $this->currency->getSymbolLeft($currencyCode);
         if ($currencySymbol == '') {
             $currencySymbol = $this->currency->getSymbolRight($currencyCode);
@@ -352,7 +360,8 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
         return $currencySymbol;
     }
 
-    public function replaceSpace($veri) {
+    public function replaceSpace($veri)
+    {
         $veri = str_replace("/s+/", "", $veri);
         $veri = str_replace(" ", "", $veri);
         $veri = str_replace(" ", "", $veri);
@@ -363,15 +372,16 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
         return $veri;
     }
 
-    function getRecordById($id_order) {
+    public function getRecordById($id_order)
+    {
 
         $moka_order_id = $id_order;
-     $payment_moka_payment_test_mode = $this->config->get('payment_moka_payment_test_mode');
-	  if ($payment_moka_payment_test_mode == 'OFF') {
-	  $url = 'https://service.moka.com/PaymentDealer/GetDealerPaymentTrxDetailList';
-	  }else{
-		    $url = 'https://service.testmoka.com/PaymentDealer/GetDealerPaymentTrxDetailList';
-	  }
+        $payment_moka_payment_test_mode = $this->config->get('payment_moka_payment_test_mode');
+        if ($payment_moka_payment_test_mode == 'OFF') {
+            $url = 'https://service.moka.com/PaymentDealer/GetDealerPaymentTrxDetailList';
+        } else {
+            $url = 'https://service.testmoka.com/PaymentDealer/GetDealerPaymentTrxDetailList';
+        }
         $moka_username = $this->config->get('payment_moka_payment_username');
         $moka_password = $this->config->get('payment_moka_payment_password');
         $moka_dealercode = $this->config->get('payment_moka_payment_dealercode');
@@ -380,18 +390,18 @@ class ControllerExtensionPaymentMokaPayment extends Controller {
             'DealerCode' => $moka_dealercode,
             'Username' => $moka_username,
             'Password' => $moka_password,
-            'CheckKey' => hash('sha256', $moka_dealercode . 'MK' . $moka_username . 'PD' . $moka_password)
+            'CheckKey' => hash('sha256', $moka_dealercode . 'MK' . $moka_username . 'PD' . $moka_password),
         );
         $moka['PaymentDealerRequest'] = array(
             'DealerPaymentId' => null,
-            'OtherTrxCode' => $moka_order_id
+            'OtherTrxCode' => $moka_order_id,
         );
 
         return json_decode($this->curlPostExt(json_encode($moka), $url, true));
     }
 
-    private function record2Table($record) {
-
+    private function record2Table($record)
+    {
 
         $r = 'Moka işlem No:' . $record->Data->PaymentDetail->DealerPaymentId . " ";
         $r .= 'Sepet toplamı:' . $record->Data->PaymentDetail->DealerCommissionAmount + $record->Data->PaymentDetail->Amount . " ";
