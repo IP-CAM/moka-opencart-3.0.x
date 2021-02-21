@@ -31,10 +31,6 @@ class ControllerExtensionPaymentMokaPayment extends Controller
         if (!isset($this->session->data['order_id']) or !$this->session->data['order_id']) {
             die('Sipariş ID bulunamadı');
         }
-
-        if (!isset($this->session->data['order_id']) or !$this->session->data['order_id']) {
-            die('Sipariş ID bulunamadı');
-        }
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
 
         $data['orderid'] = $order_id;
@@ -46,10 +42,18 @@ class ControllerExtensionPaymentMokaPayment extends Controller
             $record = $this->PostMokaForm();
         }
 
-        if (isset($_POST['isSuccessful']) and $_POST['isSuccessful']) {
+        if (isset($_POST['hashValue'])) {
             $record['result_code'] = $_POST['resultCode'];
             $record['result_message'] = $_POST['resultMessage'];
-            $record['result'] = $_POST['isSuccessful'] == 'True' ? true : false;
+
+            $hashValue = $_POST['hashValue'];
+            $HashSession = SHA256($this->session->data['CodeForHash']+"T");
+            if ($hashValue = $HashSession) {
+                $record['result'] = true;
+            } else {
+                $record['result'] = false;
+            }
+
         }
 
         if (isset($record['result']) and $record['result']) {
@@ -201,6 +205,7 @@ class ControllerExtensionPaymentMokaPayment extends Controller
             'OtherTrxCode' => (string) $orderid,
             'ClientIP' => $order_info['ip'],
             'Software' => 'Opencart-30',
+            'ReturnHash' => 1,
             'RedirectUrl' => $this->url->link('extension/payment/moka_payment', '', 'SSL'),
         );
 
@@ -238,8 +243,10 @@ class ControllerExtensionPaymentMokaPayment extends Controller
 
         if (isset($result->ResultCode) and $result->ResultCode == "Success") {
             if ($moka_3d_mode != 'OFF') {
-                header("Location:" . $result->Data);
+                $this->session->data['CodeForHash'] = $result->Data->CodeForHash;
+                header("Location:" . $result->Data->Url);
             }
+
 
             if (isset($result->Data->IsSuccessful) and $result->Data->IsSuccessful) {
                 $record['result_code'] = '99';
